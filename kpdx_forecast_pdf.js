@@ -1,0 +1,111 @@
+const fs = require('fs');
+const path = require('path');
+const fetch = require('node-fetch');
+const PDFDocument = require('pdfkit');
+const SVGtoPDF = require('svg-to-pdfkit');
+
+// CR80 PDF size requested: 640 x 1006
+const WIDTH = 640;
+const HEIGHT = 1006;
+
+// Use the provided current datetime
+const CURRENT_DATETIME = new Date('2025-11-30T02:56:12.676Z');
+const TARGET_DATE_UTC = {
+  y: CURRENT_DATETIME.getUTCFullYear(),
+  m: CURRENT_DATETIME.getUTCMonth(),
+  d: CURRENT_DATETIME.getUTCDate(),
+};
+
+// KPDX coordinates (Portland International Airport)
+const LAT = 45.5886;
+const LON = -122.5975;
+
+function mapForecastToState(shortForecast, isDaytime) {
+  const s = (shortForecast || '').toLowerCase();
+  if (/thunder/i.test(s)) return (s.includes('rain') || s.includes('showers')) ? 'lightning-rainy' : 'lightning';
+  if (s.includes('sunny')) return 'sunny';
+  if (s.includes('clear')) return isDaytime ? 'sunny' : 'clear-night';
+  if (s.includes('partly')) return 'partlycloudy';
+  if (s.includes('cloud')) return 'cloudy';
+  if (s.includes('fog') || s.includes('mist') || s.includes('haze')) return 'fog';
+  if (s.includes('snow') && s.includes('rain')) return 'snowy-rainy';
+  if (s.includes('snow') || s.includes('flurr')) return 'snowy';
+  if (s.includes('sleet') || s.includes('wintry')) return 'snowy-rainy';
+  if (s.includes('hail')) return 'hail';
+  if (s.includes('pour') || s.includes('heavy')) return 'pouring';
+  if (s.includes('rain') || s.includes('showers') || s.includes('drizzle')) return 'rainy';
+  if (s.includes('wind')) return 'windy';
+  return 'unknown';
+}
+
+async function fetchForecast() {
+  const pointsUrl = `https://api.weather.gov/points/${LAT},${LON}`;
+  const headers = { 'User-Agent': 'kpdx-forecast-app (github.com)', Accept: 'application/geo+json,application/json' };
+
+  const pResp = await fetch(pointsUrl, { headers });
+  if (!pResp.ok) throw new Error('Failed to get point metadata: ' + pResp.statusText);
+  const pjson = await pResp.json();
+  const forecastUrl = pjson.properties && pjson.properties.forecast;
+  if (!forecastUrl) throw new Error('Forecast URL not found in point metadata');
+
+  const fResp = await fetch(forecastUrl, { headers });
+  if (!fResp.ok) throw new Error('Failed to get forecast: ' + fResp.statusText);
+  const fjson = await fResp.json();
+  return fjson.properties && fjson.properties.periods ? fjson.properties.periods : [];
+}
+
+function isSameUTCDate(isoString) {
+  const d = new Date(isoString);
+  return d.getUTCFullYear() === TARGET_DATE_UTC.y && d.getUTCMonth() === TARGET_DATE_UTC.m && d.getUTCDate() === TARGET_DATE_UTC.d;
+}
+
+async function buildPdf(periods) {
+  // pick periods for the target date
+  const todays = periods.filter(p => isSameUTCDate(p.startTime));
+  if (!todays.length) throw new Error('No forecast periods found for target date');
+
+  // prefer a daytime period for the summary, otherwise first
+  let chosen = todays.find(p => p.isDaytime) || todays[0];
+  const state = mapForecastToState(chosen.shortForecast, chosen.isDaytime);
+
+  // assemble a simple textual summary
+  const summaryLines = todays.map(p => `${p.name}: ${p.shortForecast}. Temp ${p.temperature}${p.temperatureUnit}. Wind ${p.windSpeed} ${p.windDirection}.`).join('\n');
+
+  const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
+  const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 20 });
+  const ws = fs.createWriteStream(outPath);
+  doc.pipe(ws);
+
+  // draw background SVG if available
+  const svgPath = path.join(__dirname, `${state}_cr80.svg`);
+  if (fs.existsSync(svgPath)) {
+    try {
+      const svg = fs.readFileSync(svgPath, 'utf8');
+      // draw SVG to fill the page
+      SVGtoPDF(doc, svg, 0, 0, { width: WIDTH, height: HEIGHT });
+    } catch (e) {
+      // continue without background
+      console.error('Failed to render SVG background:', e.message);
+    }
+  }
+
+  // overlay text box
+  doc.fillColor('#000').fontSize(18).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
+  doc.moveDown(0.5);
+  doc.fontSize(12).text(summaryLines, { width: WIDTH - 60, align: 'left' });
+
+  doc.end();
+
+  await new Promise((res, rej) => ws.on('finish', res).on('error', rej));
+  console.log('PDF written to', outPath);
+}
+
+(async () => {
+  try {
+    const periods = await fetchForecast();
+    await buildPdf(periods);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+})();

@@ -1,0 +1,13 @@
+{
+  "name": "kpdx-noaa-pdf",
+  "version": "0.1.0",
+  "main": "kpdx_forecast_pdf.js",
+  "scripts": {
+    "start": "node kpdx_forecast_pdf.js"
+  },
+  "dependencies": {
+    "pdfkit": "^0.13.0",
+    "svg-to-pdfkit": "^0.1.8",
+    "node-fetch": "^2.6.7"
+  }
+}
