@@ -76,8 +76,8 @@ async function buildPdf(periods) {
   const ws = fs.createWriteStream(outPath);
   doc.pipe(ws);
 
-  // draw background SVG if available
-  const svgPath = path.join(__dirname, `${state}_cr80.svg`);
+  // draw background SVG if available (now stored in svgs/)
+  const svgPath = path.join(__dirname, 'svgs', `${state}_cr80.svg`);
   if (fs.existsSync(svgPath)) {
     try {
       const svg = fs.readFileSync(svgPath, 'utf8');

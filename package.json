@@ -1,9 +1,9 @@
 {
   "name": "kpdx-noaa-pdf",
   "version": "0.1.0",
-  "main": "kpdx_forecast_pdf.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node kpdx_forecast_pdf.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "pdfkit": "^0.13.0",
