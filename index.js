@@ -8,8 +8,8 @@ const SVGtoPDF = require('svg-to-pdfkit');
 const WIDTH = 640;
 const HEIGHT = 1006;
 
-// Determine CURRENT_DATETIME: use optional env override or system time. If local hour >= 6 use the next day, otherwise use current day
-const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date();
+// Determine CURRENT_DATETIME: use optional env override or provided timestamp; if local hour >= 6 use the next day, otherwise use current day
+const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date('2025-11-30T03:20:04.202Z');
 const candidate = new Date(now);
 if (now.getHours() >= 6) candidate.setDate(candidate.getDate() + 1);
 const CURRENT_DATETIME = candidate;
@@ -72,7 +72,8 @@ async function buildPdf(periods) {
   const state = mapForecastToState(chosen.shortForecast, chosen.isDaytime);
 
   // assemble a single-period summary (daytime preferred)
-  const summaryLines = `${chosen.name}: ${chosen.shortForecast}. Temp ${chosen.temperature}${chosen.temperatureUnit}.`;
+  const summaryLines = `${chosen.name}: ${chosen.shortForecast}.`;
+  const tempText = `${chosen.temperature}${chosen.temperatureUnit}`;
 
   const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
   // create PDF in landscape: swap width/height
