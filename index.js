@@ -73,7 +73,7 @@ async function buildPdf(periods) {
   const state = mapForecastToState(chosen.shortForecast, chosen.isDaytime);
 
   // assemble a single-period summary (daytime preferred)
-  const summaryLines = `${chosen.name}: ${chosen.shortForecast}.`;
+  const summaryLines = `${chosen.detailedForecast}.`;
   const tempText = `${chosen.temperature}${chosen.temperatureUnit}`;
 
   const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
