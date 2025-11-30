@@ -71,8 +71,8 @@ async function buildPdf(periods) {
   let chosen = todays.find(p => p.isDaytime) || todays[0];
   const state = mapForecastToState(chosen.shortForecast, chosen.isDaytime);
 
-  // assemble a simple textual summary
-  const summaryLines = todays.map(p => `${p.name}: ${p.shortForecast}. Temp ${p.temperature}${p.temperatureUnit}.`).join('\n');
+  // assemble a single-period summary (daytime preferred)
+  const summaryLines = `${chosen.name}: ${chosen.shortForecast}. Temp ${chosen.temperature}${chosen.temperatureUnit}.`;
 
   const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
   // create PDF in landscape: swap width/height
