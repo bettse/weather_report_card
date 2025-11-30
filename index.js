@@ -94,11 +94,11 @@ async function buildPdf(periods) {
     }
   }
 
-  // overlay text box
-  doc.fillColor('#000').fontSize(18).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
+  // overlay text box (larger for CR80)
+  doc.fillColor('#000').fontSize(36).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
   doc.moveDown(0.5);
   // wrap text to the landscape page width
-  doc.fontSize(12).text(summaryLines, { width: HEIGHT - 60, align: 'left' });
+  doc.fontSize(24).text(summaryLines, { width: HEIGHT - 60, align: 'left' });
 
   doc.end();
 
