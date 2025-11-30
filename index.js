@@ -75,7 +75,8 @@ async function buildPdf(periods) {
   const summaryLines = todays.map(p => `${p.name}: ${p.shortForecast}. Temp ${p.temperature}${p.temperatureUnit}.`).join('\n');
 
   const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
-  const doc = new PDFDocument({ size: [WIDTH, HEIGHT], margin: 20 });
+  // create PDF in landscape: swap width/height
+  const doc = new PDFDocument({ size: [HEIGHT, WIDTH], margin: 20 });
   const ws = fs.createWriteStream(outPath);
   doc.pipe(ws);
 
@@ -85,7 +86,8 @@ async function buildPdf(periods) {
     try {
       const svg = fs.readFileSync(svgPath, 'utf8');
       // draw SVG to fill the page
-      SVGtoPDF(doc, svg, 0, 0, { width: WIDTH, height: HEIGHT });
+      // draw SVG to fill the page (landscape)
+      SVGtoPDF(doc, svg, 0, 0, { width: HEIGHT, height: WIDTH });
     } catch (e) {
       // continue without background
       console.error('Failed to render SVG background:', e.message);
@@ -95,7 +97,8 @@ async function buildPdf(periods) {
   // overlay text box
   doc.fillColor('#000').fontSize(18).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
   doc.moveDown(0.5);
-  doc.fontSize(12).text(summaryLines, { width: WIDTH - 60, align: 'left' });
+  // wrap text to the landscape page width
+  doc.fontSize(12).text(summaryLines, { width: HEIGHT - 60, align: 'left' });
 
   doc.end();
 
