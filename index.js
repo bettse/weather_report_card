@@ -9,7 +9,7 @@ const WIDTH = 640;
 const HEIGHT = 1006;
 
 // Determine CURRENT_DATETIME: use optional env override or provided timestamp; compute target local date (if local hour >= 6 use next local day), using local midnight to avoid UTC rollover
-const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date('2025-11-30T03:24:52.258Z');
+const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date('2025-11-30T03:27:07.830Z');
 const offset = now.getHours() >= 6 ? 1 : 0;
 // targetLocalMidnight is at local 00:00 of the chosen date
 const targetLocalMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, 0, 0, 0);
