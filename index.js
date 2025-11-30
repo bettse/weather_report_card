@@ -8,11 +8,12 @@ const SVGtoPDF = require('svg-to-pdfkit');
 const WIDTH = 640;
 const HEIGHT = 1006;
 
-// Determine CURRENT_DATETIME: use optional env override or provided timestamp; if local hour >= 6 use the next day, otherwise use current day
-const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date('2025-11-30T03:20:04.202Z');
-const candidate = new Date(now);
-if (now.getHours() >= 6) candidate.setDate(candidate.getDate() + 1);
-const CURRENT_DATETIME = candidate;
+// Determine CURRENT_DATETIME: use optional env override or provided timestamp; compute target local date (if local hour >= 6 use next local day), using local midnight to avoid UTC rollover
+const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date('2025-11-30T03:24:52.258Z');
+const offset = now.getHours() >= 6 ? 1 : 0;
+// targetLocalMidnight is at local 00:00 of the chosen date
+const targetLocalMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, 0, 0, 0);
+const CURRENT_DATETIME = targetLocalMidnight;
 const TARGET_DATE_UTC = {
   y: CURRENT_DATETIME.getUTCFullYear(),
   m: CURRENT_DATETIME.getUTCMonth(),
