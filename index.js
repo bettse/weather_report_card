@@ -8,8 +8,11 @@ const SVGtoPDF = require('svg-to-pdfkit');
 const WIDTH = 640;
 const HEIGHT = 1006;
 
-// Use the provided current datetime
-const CURRENT_DATETIME = new Date('2025-11-30T02:56:12.676Z');
+// Determine CURRENT_DATETIME: use optional env override or system time. If local hour >= 6 use the next day, otherwise use current day
+const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date();
+const candidate = new Date(now);
+if (now.getHours() >= 6) candidate.setDate(candidate.getDate() + 1);
+const CURRENT_DATETIME = candidate;
 const TARGET_DATE_UTC = {
   y: CURRENT_DATETIME.getUTCFullYear(),
   m: CURRENT_DATETIME.getUTCMonth(),
