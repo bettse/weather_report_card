@@ -97,11 +97,17 @@ async function buildPdf(periods) {
   }
 
   // overlay text box (larger for CR80)
-  doc.fillColor('#000').fontSize(36).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
-  // layout: summary on left, prominent temp on right
+  // header left
+  doc.fillColor('#000').fontSize(36).text('KPDX Forecast', 30, 30);
+  // date upper-right
+  const dateStr = CURRENT_DATETIME.toISOString().slice(0,10);
+  doc.fontSize(18).fillColor('#000').text(dateStr, 30, 30, { width: HEIGHT - 60, align: 'right' });
+  // layout: prominent temp on right
   const bodyY = 90;
-  doc.fontSize(24).fillColor('#000').text(summaryLines, 30, bodyY, { width: HEIGHT - 240, align: 'left' });
   doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
+  // weather description centered at bottom
+  const bottomY = WIDTH - 80;
+  doc.fontSize(22).fillColor('#000').text(summaryLines, 30, bottomY, { width: HEIGHT - 60, align: 'center' });
 
   doc.end();
 
