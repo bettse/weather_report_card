@@ -97,9 +97,10 @@ async function buildPdf(periods) {
 
   // overlay text box (larger for CR80)
   doc.fillColor('#000').fontSize(36).text(`KPDX Forecast — ${CURRENT_DATETIME.toISOString().slice(0,10)}`, 30, 30);
-  doc.moveDown(0.5);
-  // wrap text to the landscape page width
-  doc.fontSize(24).text(summaryLines, { width: HEIGHT - 60, align: 'left' });
+  // layout: summary on left, prominent temp on right
+  const bodyY = 90;
+  doc.fontSize(24).fillColor('#000').text(summaryLines, 30, bodyY, { width: HEIGHT - 240, align: 'left' });
+  doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
 
   doc.end();
 
