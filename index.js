@@ -76,7 +76,11 @@ async function buildPdf(periods) {
   const summaryLines = `${chosen.detailedForecast}.`;
   const tempText = `${chosen.temperature}${chosen.temperatureUnit}`;
 
-  const outPath = path.join(__dirname, 'kpdx_forecast_cr80.pdf');
+  const y = CURRENT_DATETIME.getFullYear();
+  const m = String(CURRENT_DATETIME.getMonth() + 1).padStart(2, '0');
+  const d = String(CURRENT_DATETIME.getDate()).padStart(2, '0');
+  const filename = `${y}${m}${d}.pdf`;
+  const outPath = path.join(__dirname, filename);
   // create PDF in landscape: swap width/height
   const doc = new PDFDocument({ size: [HEIGHT, WIDTH], margin: 20 });
   const ws = fs.createWriteStream(outPath);
