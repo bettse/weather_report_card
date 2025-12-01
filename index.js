@@ -116,9 +116,12 @@ async function buildPdf(periods) {
   // date upper-right (human-friendly, same size as header)
   const dateStr = CURRENT_DATETIME.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
   doc.fontSize(HEADER_FONT_SIZE).fillColor('#000').text(dateStr, 30, 30, { width: HEIGHT - H_TEXT_PADDING, align: 'right' });
-  // layout: prominent temp on right
+  // layout: prominent temp centered on card (over SVG background)
   const bodyY = BODY_Y;
-  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - H_TEXT_PADDING, align: 'right' });
+  // center vertically and horizontally
+  const centerY = doc.page.height / 2;
+  const tempY = Math.max(0, centerY - Math.round(TEMP_FONT_SIZE / 2));
+  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(tempText, 0, tempY, { width: doc.page.width, align: 'center' });
   // weather description centered at bottom
   doc.fontSize(DESC_FONT_SIZE).fillColor('#000');
   const textWidth = HEIGHT - H_TEXT_PADDING;
