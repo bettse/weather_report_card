@@ -115,12 +115,7 @@ async function buildPdf(periods) {
   const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' });
   const bottomMargin = 20;
   // desired bottom start
-  let bottomY = doc.page.height - 120;
-  // if the text would overflow the page, move it up so it fits inside the page margins
-  if (bottomY + textHeight > doc.page.height - bottomMargin) {
-    bottomY = doc.page.height - bottomMargin - textHeight;
-  }
-  // allow overlapping the body area if necessary to avoid spilling to a second page
+  let bottomY = doc.page.height - bottomMargin - textHeight;
   doc.text(summaryLines, 30, bottomY, { width: textWidth, align: 'center' });
 
   doc.end();
