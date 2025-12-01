@@ -73,7 +73,7 @@ async function buildPdf(periods) {
   const state = mapForecastToState(chosen.shortForecast, chosen.isDaytime);
 
   // assemble a single-period summary (daytime preferred)
-  const summaryLines = `${chosen.detailedForecast}.`;
+  const summaryLines = `${chosen.shortForecast}.`;
   const tempText = `${chosen.temperature}${chosen.temperatureUnit}`;
 
   const y = CURRENT_DATETIME.getFullYear();
@@ -110,9 +110,9 @@ async function buildPdf(periods) {
   const bodyY = 90;
   doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
   // weather description centered at bottom
-  doc.fontSize(36).fillColor('#000');
+  doc.fontSize(64).fillColor('#000');
   const textWidth = HEIGHT - 60;
-  const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' });
+  const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' }) * 1.1;
   const bottomMargin = 20;
   // desired bottom start
   let bottomY = doc.page.height - bottomMargin - textHeight;
