@@ -140,3 +140,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 kpdx_forecast_cr80.pdf
+*.pdf
