@@ -110,12 +110,12 @@ async function buildPdf(periods) {
   const bodyY = 90;
   doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
   // weather description centered at bottom
-  doc.fontSize(22).fillColor('#000');
+  doc.fontSize(36).fillColor('#000');
   const textWidth = HEIGHT - 60;
   const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' });
   const bottomMargin = 20;
   // desired bottom start
-  let bottomY = doc.page.height - 80;
+  let bottomY = doc.page.height - 120;
   // if the text would overflow the page, move it up so it fits inside the page margins
   if (bottomY + textHeight > doc.page.height - bottomMargin) {
     bottomY = doc.page.height - bottomMargin - textHeight;
