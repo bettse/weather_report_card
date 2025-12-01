@@ -10,9 +10,9 @@ const HEIGHT = 1006;
 
 // Layout and typography constants
 const MARGIN = 20;
-const HEADER_FONT_SIZE = 36;
-const TEMP_FONT_SIZE = 64;
-const DESC_FONT_SIZE = 64;
+const HEADER_FONT_SIZE = 48;
+const TEMP_FONT_SIZE = 80;
+const DESC_FONT_SIZE = 80;
 const BODY_Y = 90;
 const H_TEXT_PADDING = 60; // horizontal padding to subtract from HEIGHT for text width
 const BOTTOM_MARGIN = 20;
