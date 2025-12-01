@@ -110,8 +110,20 @@ async function buildPdf(periods) {
   const bodyY = 90;
   doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
   // weather description centered at bottom
-  const bottomY = WIDTH - 80;
-  doc.fontSize(22).fillColor('#000').text(summaryLines, 30, bottomY, { width: HEIGHT - 60, align: 'center' });
+  doc.fontSize(22).fillColor('#000');
+  const textWidth = HEIGHT - 60;
+  const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' });
+  const bottomMargin = 20;
+  // desired bottom start
+  let bottomY = doc.page.height - 80;
+  // if the text would overflow the page, move it up so it fits inside the page margins
+  if (bottomY + textHeight > doc.page.height - bottomMargin) {
+    bottomY = doc.page.height - bottomMargin - textHeight;
+  }
+  // ensure it doesn't overlap the body area
+  const minY = bodyY + 40;
+  if (bottomY < minY) bottomY = minY;
+  doc.text(summaryLines, 30, bottomY, { width: textWidth, align: 'center' });
 
   doc.end();
 
