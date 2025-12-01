@@ -120,9 +120,7 @@ async function buildPdf(periods) {
   if (bottomY + textHeight > doc.page.height - bottomMargin) {
     bottomY = doc.page.height - bottomMargin - textHeight;
   }
-  // ensure it doesn't overlap the body area
-  const minY = bodyY + 40;
-  if (bottomY < minY) bottomY = minY;
+  // allow overlapping the body area if necessary to avoid spilling to a second page
   doc.text(summaryLines, 30, bottomY, { width: textWidth, align: 'center' });
 
   doc.end();
