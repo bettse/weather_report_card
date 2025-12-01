@@ -8,6 +8,16 @@ const SVGtoPDF = require('svg-to-pdfkit');
 const WIDTH = 640;
 const HEIGHT = 1006;
 
+// Layout and typography constants
+const MARGIN = 20;
+const HEADER_FONT_SIZE = 36;
+const TEMP_FONT_SIZE = 64;
+const DESC_FONT_SIZE = 64;
+const BODY_Y = 90;
+const H_TEXT_PADDING = 60; // horizontal padding to subtract from HEIGHT for text width
+const BOTTOM_MARGIN = 20;
+const TEXT_HEIGHT_MULT = 1.1;
+
 // Determine CURRENT_DATETIME: use optional env override or provided timestamp; compute target local date (if local hour >= 6 use next local day), using local midnight to avoid UTC rollover
 const now = process.env.CURRENT_DATETIME_OVERRIDE ? new Date(process.env.CURRENT_DATETIME_OVERRIDE) : new Date();
 const offset = now.getHours() >= 6 ? 1 : 0;
@@ -82,7 +92,7 @@ async function buildPdf(periods) {
   const filename = `${y}${m}${d}.pdf`;
   const outPath = path.join(__dirname, filename);
   // create PDF in landscape: swap width/height
-  const doc = new PDFDocument({ size: [HEIGHT, WIDTH], margin: 20 });
+  const doc = new PDFDocument({ size: [HEIGHT, WIDTH], margin: MARGIN });
   const ws = fs.createWriteStream(outPath);
   doc.pipe(ws);
 
@@ -102,20 +112,19 @@ async function buildPdf(periods) {
 
   // overlay text box (larger for CR80)
   // header left
-  doc.fillColor('#000').fontSize(36).text('KPDX Forecast', 30, 30);
+  doc.fillColor('#000').fontSize(HEADER_FONT_SIZE).text('KPDX Forecast', 30, 30);
   // date upper-right (human-friendly, same size as header)
   const dateStr = CURRENT_DATETIME.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
-  doc.fontSize(36).fillColor('#000').text(dateStr, 30, 30, { width: HEIGHT - 60, align: 'right' });
+  doc.fontSize(HEADER_FONT_SIZE).fillColor('#000').text(dateStr, 30, 30, { width: HEIGHT - H_TEXT_PADDING, align: 'right' });
   // layout: prominent temp on right
-  const bodyY = 90;
-  doc.fontSize(64).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - 60, align: 'right' });
+  const bodyY = BODY_Y;
+  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(tempText, 30, bodyY - 6, { width: HEIGHT - H_TEXT_PADDING, align: 'right' });
   // weather description centered at bottom
-  doc.fontSize(64).fillColor('#000');
-  const textWidth = HEIGHT - 60;
-  const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' }) * 1.1;
-  const bottomMargin = 20;
+  doc.fontSize(DESC_FONT_SIZE).fillColor('#000');
+  const textWidth = HEIGHT - H_TEXT_PADDING;
+  const textHeight = doc.heightOfString(summaryLines, { width: textWidth, align: 'center' }) * TEXT_HEIGHT_MULT;
   // desired bottom start
-  let bottomY = doc.page.height - bottomMargin - textHeight;
+  let bottomY = doc.page.height - BOTTOM_MARGIN - textHeight;
   doc.text(summaryLines, 30, bottomY, { width: textWidth, align: 'center' });
 
   doc.end();
