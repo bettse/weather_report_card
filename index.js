@@ -60,12 +60,27 @@ async function fetchForecast() {
   if (!pResp.ok) throw new Error('Failed to get point metadata: ' + pResp.statusText);
   const pjson = await pResp.json();
   const forecastUrl = pjson.properties && pjson.properties.forecast;
+  const hourlyUrl = pjson.properties && pjson.properties.forecastHourly;
   if (!forecastUrl) throw new Error('Forecast URL not found in point metadata');
 
   const fResp = await fetch(forecastUrl, { headers });
   if (!fResp.ok) throw new Error('Failed to get forecast: ' + fResp.statusText);
   const fjson = await fResp.json();
-  return fjson.properties && fjson.properties.periods ? fjson.properties.periods : [];
+
+  let hourlyPeriods = [];
+  if (hourlyUrl) {
+    try {
+      const hResp = await fetch(hourlyUrl, { headers });
+      if (hResp.ok) {
+        const hjson = await hResp.json();
+        hourlyPeriods = hjson.properties && hjson.properties.periods ? hjson.properties.periods : [];
+      }
+    } catch (e) {
+      // ignore hourly fetch errors
+    }
+  }
+
+  return { periods: (fjson.properties && fjson.properties.periods) ? fjson.properties.periods : [], hourly: hourlyPeriods };
 }
 
 function isSameUTCDate(isoString) {
@@ -73,9 +88,9 @@ function isSameUTCDate(isoString) {
   return d.getUTCFullYear() === TARGET_DATE_UTC.y && d.getUTCMonth() === TARGET_DATE_UTC.m && d.getUTCDate() === TARGET_DATE_UTC.d;
 }
 
-async function buildPdf(periods) {
+async function buildPdf(data) {
   // pick periods for the target date
-  const todays = periods.filter(p => isSameUTCDate(p.startTime));
+  const todays = data.periods.filter(p => isSameUTCDate(p.startTime));
   if (!todays.length) throw new Error('No forecast periods found for target date');
 
   // prefer a daytime period for the summary, otherwise first
@@ -116,12 +131,31 @@ async function buildPdf(periods) {
   // date upper-right (human-friendly, same size as header)
   const dateStr = CURRENT_DATETIME.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
   doc.fontSize(HEADER_FONT_SIZE).fillColor('#000').text(dateStr, 30, 30, { width: HEIGHT - H_TEXT_PADDING, align: 'right' });
-  // layout: prominent temp centered on card (over SVG background)
+  // layout: compute day's high/low from hourly data and place low left-middle, high right-middle
   const bodyY = BODY_Y;
-  // center vertically and horizontally
+  const hourly = data.hourly || [];
+  const todaysHourly = hourly.filter(h => isSameUTCDate(h.startTime));
+  let lowText = '';
+  let highText = '';
+  if (todaysHourly && todaysHourly.length) {
+    const temps = todaysHourly.map(h => h.temperature).filter(t => typeof t === 'number');
+    if (temps.length) {
+      const min = Math.min(...temps);
+      const max = Math.max(...temps);
+      const unit = (todaysHourly.find(h => h.temperatureUnit) || {}).temperatureUnit || (chosen.temperatureUnit || '');
+      lowText = `${min}${unit}`;
+      highText = `${max}${unit}`;
+    }
+  } else {
+    // fallback to chosen temp
+    lowText = tempText;
+    highText = tempText;
+  }
+  // place low on left-middle and high on right-middle
   const centerY = doc.page.height / 2;
   const tempY = Math.max(0, centerY - Math.round(TEMP_FONT_SIZE / 2));
-  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(tempText, 0, tempY, { width: doc.page.width, align: 'center' });
+  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(lowText, 30, tempY, { width: doc.page.width / 2 - 60, align: 'left' });
+  doc.fontSize(TEMP_FONT_SIZE).fillColor('#111').text(highText, doc.page.width / 2, tempY, { width: doc.page.width / 2 - 30, align: 'right' });
   // weather description centered at bottom
   doc.fontSize(DESC_FONT_SIZE).fillColor('#000');
   const textWidth = HEIGHT - H_TEXT_PADDING;
@@ -138,8 +172,8 @@ async function buildPdf(periods) {
 
 (async () => {
   try {
-    const periods = await fetchForecast();
-    await buildPdf(periods);
+    const data = await fetchForecast();
+    await buildPdf(data);
   } catch (e) {
     console.error(e);
     process.exit(1);
