@@ -11,9 +11,9 @@ Example
 <p align="center"><img src="./example_20251202.png" alt="Sample card" style="width:300px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.35);margin-top:8px;"/></p>
 
 Quick start
-1. Install dependencies: npm install
-2. Generate a PDF: npm start
-3. Override date for testing: CURRENT_DATETIME_OVERRIDE=2025-12-02T03:21:20.571Z node index.js
+1. Install dependencies: `npm install`
+2. Generate a PDF: `npm start`
+3. Override date for testing: `CURRENT_DATETIME_OVERRIDE=2025-12-02T03:21:20.571Z node index.js`
 
 Printing
 - System print: lp -d <PRINTER> -o media=CR80 -o fitplot 20251202.pdf will hand off fit-to-page to CUPS. 🖨️
