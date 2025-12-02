@@ -1,8 +1,10 @@
 const fs = require('fs');
+const util = require("util");
 const path = require('path');
 const fetch = require('node-fetch');
 const PDFDocument = require('pdfkit');
 const SVGtoPDF = require('svg-to-pdfkit');
+const ipp = require("ipp");
 
 // CR80 PDF size requested: 640 x 1006
 const WIDTH = 640;
@@ -33,6 +35,10 @@ const TARGET_DATE_UTC = {
 // KPDX coordinates (Portland International Airport)
 const LAT = 45.5886;
 const LON = -122.5975;
+
+
+const uri = "ipp://localhost:631/printers/Zebra_Technologies_ZTC_ZC350";
+const printer = ipp.Printer(uri);
 
 function mapForecastToState(shortForecast, isDaytime) {
   const s = (shortForecast || '').toLowerCase();
@@ -168,12 +174,39 @@ async function buildPdf(data) {
 
   await new Promise((res, rej) => ws.on('finish', res).on('error', rej));
   console.log('PDF written to', outPath);
+  return outPath;
+}
+
+async function printPdf(filePath) {
+  const print = util.promisify(printer.execute).bind(printer);
+
+  try {
+    const pdf = fs.readFileSync(filePath);
+
+    const request = {
+      "operation-attributes-tag": {
+        "requesting-user-name": "kpdx-forecast-app",
+        "document-format": "application/pdf",
+      },
+      "job-attributes-tag": {
+        "media": "CR80",
+        "print-scaling": "fit",
+      },
+      data: pdf,
+    };
+
+    const result = await print("Print-Job", request);
+    return result;
+  } catch (error) {
+    console.error("Error printing PDF:", error);
+  }
 }
 
 (async () => {
   try {
     const data = await fetchForecast();
-    await buildPdf(data);
+    const path = await buildPdf(data);
+    await printPdf(path);
   } catch (e) {
     console.error(e);
     process.exit(1);
