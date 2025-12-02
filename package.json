@@ -6,7 +6,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "ipp": "git+https://github.com/williamkapke/ipp.git",
+    "ipp": "git+https://github.com/bettse/ipp.git",
     "node-fetch": "^2.6.7",
     "pdfkit": "^0.13.0",
     "svg-to-pdfkit": "^0.1.8"

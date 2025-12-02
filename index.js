@@ -190,7 +190,7 @@ async function printPdf(filePath) {
       },
       "job-attributes-tag": {
         "media": "CR80",
-        "print-scaling": "fit",
+        "fitplot": true,
       },
       data: pdf,
     };
