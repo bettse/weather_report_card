@@ -18,6 +18,11 @@ Printing
 Files
 - index.js — main script that fetches forecasts, renders SVGs, and writes the PDF.
 - svgs/ — background SVG assets (named like sunny_cr80.svg, rainy_cr80.svg, etc.).
+- example_20251202.png — sample generated card converted from 20251202.pdf (embedded below).
+
+Example
+
+![Sample card](./example_20251202.png)
 
 Notes
 - The generated PDF is placed in the repository root and named for the target local date in YYYYMMDD.pdf format. ✅
