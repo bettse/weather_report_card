@@ -6,6 +6,10 @@ Highlights
 - Generates a single PDF named YYYYMMDD.pdf for the target date (e.g. 20251202.pdf). 📁
 - Target date is computed from the current local time; override with CURRENT_DATETIME_OVERRIDE (ISO timestamp) for testing. ⏱️
 
+Example
+
+<p align="center"><img src="./example_20251202.png" alt="Sample card" style="width:300px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.35);margin-top:8px;"/></p>
+
 Quick start
 1. Install dependencies: npm install
 2. Generate a PDF: npm start
